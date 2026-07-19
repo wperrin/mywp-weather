@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Whistling Will's US Weather Outlook Page</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.0/font/bootstrap-icons.min.css" rel="stylesheet">
+	<style>
+		/* ── Dark mode ── */
+		[data-bs-theme="dark"] {
+			--bs-body-bg: #111827;
+			--bs-body-color: #e5e7eb;
+			--bs-card-bg: #1f2937;
+			--bs-table-striped-bg: #1a1a2e;
+			--bs-border-color: #374151;
+			--bs-primary: #3b82f6;
+			--bs-link-color: #93c5fd;
+			--bs-secondary: #6b7280;
+		}
+
+		/* ── Page shell ── */
+		.page-container {
+			max-width: 1000px;
+			margin: 20px auto;
+			padding: 20px;
+			border: 2px solid var(--bs-border-color, #ddd);
+			border-radius: 8px;
+			background: var(--bs-body-bg, #fff);
+			color: var(--bs-body-color, #212529);
+		}
+
+		/* ── Skeleton shimmer ── */
+		.skeleton {
+			background: linear-gradient(90deg, var(--bs-border-color, #dee2e6) 25%,
+				var(--bs-secondary-bg, #e9ecef) 50%,
+				var(--bs-border-color, #dee2e6) 75%);
+			background-size: 200% 100%;
+			animation: shimmer 1.5s infinite;
+			border-radius: 4px;
+			height: 1em;
+		}
+
+		@keyframes shimmer {
+			0%   { background-position: 200% 0; }
+			100% { background-position: -200% 0; }
+		}
+
+		/* ── News card images ── */
+		.news-card-img {
+			height: 160px;
+			object-fit: cover;
+			width: 100%;
+		}
+
+		/* ── Dark mode navbar tweak ── */
+		[data-bs-theme="dark"] .navbar { background-color: #1f2937 !important; }
+		[data-bs-theme="dark"] .navbar .nav-link { color: #d1d5db !important; }
+		[data-bs-theme="dark"] .navbar .nav-link:hover { color: #fff !important; }
+		[data-bs-theme="dark"] .navbar-brand { color: #e5e7eb !important; }
+
+		/* ── Theme toggle ── */
+		.theme-toggle {
+			cursor: pointer;
+			border: none;
+			background: transparent;
+			color: inherit;
+			padding: 0.375rem 0.5rem;
+			font-size: 1.2rem;
+			line-height: 1;
+		}
+
+		/* ── Stale badge ── */
+		.stale-badge {
+			font-size: 0.75rem;
+			background: #f59e0b;
+			color: #000;
+			padding: 0.1em 0.4em;
+			border-radius: 0.25rem;
+		}
+
+		/* ── Section nav ── */
+		.section-nav {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			scrollbar-width: thin;
+		}
+		.section-nav::-webkit-scrollbar { height: 4px; }
+		.section-nav::-webkit-scrollbar-thumb { background: var(--bs-border-color, #dee2e6); border-radius: 2px; }
+		.section-nav .btn-outline-primary { white-space: nowrap; }
+		[data-bs-theme="dark"] .section-nav { background-color: #1f2937 !important; border-color: #374151 !important; }
+
+	</style>
+</head>
+
+<body>
+	<div class="page-container">
+
+		<header class="bg-primary text-white text-center p-3">
+			<h1>Whistling Will's US Weather Outlook Page</h1>
+		</header>
+
+		<p class="text-center lead mt-3">
+			Explore real-time weather insights, drought conditions, and climate trends across the U.S.
+			Stay informed with NOAA front maps, long-range forecasts, and the Climate Shift Index,
+			helping you understand how climate change impacts daily temperatures.
+		</p>
+
+		<!-- ── Section Nav ── -->
+		<div class="section-nav sticky-top border-bottom mb-3" style="z-index:1020;">
+			<div class="d-flex gap-2 p-2" style="min-width:max-content;">
+				<button class="theme-toggle btn btn-sm btn-outline-secondary" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode" style="flex-shrink:0;">
+					<i class="bi bi-moon-fill" id="themeIcon"></i>
+				</button>
+				<a href="#weather-table" class="btn btn-sm btn-outline-primary">Weather Tables</a>
+				<a href="#windy-map" class="btn btn-sm btn-outline-primary">Live Map</a>
+				<a href="#column1" class="btn btn-sm btn-outline-primary">US Front/CO₂</a>
+				<a href="#drought-monitor" class="btn btn-sm btn-outline-primary">Drought</a>
+				<a href="#climate-shift-index" class="btn btn-sm btn-outline-primary">Climate</a>
+				<a href="#enso-discussion" class="btn btn-sm btn-outline-primary">ENSO</a>
+				<a href="#wind-jet-stream" class="btn btn-sm btn-outline-primary">Jet Stream</a>
+				<a href="#news-section" class="btn btn-sm btn-outline-primary">News</a>
+			</div>
+		</div>
+
+		<!-- ── Earth Nullschool Interactive Map ── -->
+		<div class="mt-4" id="windy-map">
+			<h2 class="text-center mb-2">Live World Weather Map</h2>
+			<p class="text-center text-muted small mb-2">Interactive weather map powered by <a href="https://earth.nullschool.net" target="_blank">earth.nullschool.net</a></p>
+			<div style="border-radius:8px; overflow:hidden; border:2px solid var(--bs-border-color, #dee2e6);">
+				<iframe data-src="https://earth.nullschool.net/#current/wind/surface=level/orthographic=-95.00,38.00,500"
+					width="100%" height="600"
+					style="border:none; display:block;"
+					title="Live Weather Map"
+					loading="lazy" allowfullscreen></iframe>
+			</div>
+		</div>
+
+		<!-- ── City Weather Tables ── -->
+		<div id="weather-table" class="mt-4">
+			<h2 class="text-center mb-3">Weather Tables</h2>
+			<div class="d-flex align-items-center gap-2 mb-2" id="weatherMeta"></div>
+			<div class="d-flex gap-2 mb-2">
+				<input type="search" class="form-control form-control-sm" id="weatherSearch"
+					placeholder="Filter cities…" autocomplete="off" style="max-width:220px;">
+				<button class="btn btn-sm btn-outline-secondary" id="clearWeatherSearch"
+					title="Clear filter" type="button">✕</button>
+			</div>
+			<button class="btn btn-outline-primary w-100 mb-3" type="button"
+				data-bs-toggle="collapse" data-bs-target="#weather-content"
+				aria-expanded="false" aria-controls="weather-content"
+				id="weatherToggle">
+				<i class="bi bi-chevron-double-down" id="weatherToggleIcon"></i>
+				<span id="weatherToggleLabel">Show Weather Tables</span>
+			</button>
+			<div class="collapse" id="weather-content">
+
+				<h5 class="mb-2">Top 50 US Cities</h5>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						<div class="card mb-3 mb-md-0">
+							<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+								<h5 class="mb-0">Current</h5>
+								<i class="bi bi-clock"></i>
+							</div>
+							<div class="card-body p-0">
+								<table class="table table-striped table-sm mb-0" id="current-weather-table">
+									<thead>
+										<tr>
+											<th>City</th>
+											<th>Temp</th>
+											<th>Condition</th>
+											<th>Humidity</th>
+											<th>Wind</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:90%"></div></td></tr>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:85%"></div></td></tr>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:80%"></div></td></tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="card">
+							<div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+								<h5 class="mb-0">Forecast</h5>
+								<i class="bi bi-calendar-event"></i>
+							</div>
+							<div class="card-body p-0">
+								<table class="table table-striped table-sm mb-0" id="forecast-weather-table">
+									<thead>
+										<tr>
+											<th>City</th>
+											<th>High</th>
+											<th>Low</th>
+											<th>Precip</th>
+											<th>Condition</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:90%"></div></td></tr>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:85%"></div></td></tr>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:80%"></div></td></tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<h5 class="mb-2">Top 50 World Cities</h5>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="card mb-3 mb-md-0">
+							<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+								<h5 class="mb-0">Current</h5>
+								<i class="bi bi-globe-americas"></i>
+							</div>
+							<div class="card-body p-0">
+								<table class="table table-striped table-sm mb-0" id="world-current-weather-table">
+									<thead>
+										<tr>
+											<th>City</th>
+											<th>Temp</th>
+											<th>Condition</th>
+											<th>Humidity</th>
+											<th>Wind</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:90%"></div></td></tr>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:85%"></div></td></tr>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:80%"></div></td></tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="card">
+							<div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+								<h5 class="mb-0">Forecast</h5>
+								<i class="bi bi-calendar-event"></i>
+							</div>
+							<div class="card-body p-0">
+								<table class="table table-striped table-sm mb-0" id="world-forecast-weather-table">
+									<thead>
+										<tr>
+											<th>City</th>
+											<th>High</th>
+											<th>Low</th>
+											<th>Precip</th>
+											<th>Condition</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:90%"></div></td></tr>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:85%"></div></td></tr>
+										<tr><td colspan="5"><div class="skeleton my-2 mx-3" style="width:80%"></div></td></tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- ── Maps Row ── -->
+		<div class="row mt-4">
+			<div id="column1" class="col-md-6">
+				<h2 class="text-center">Current US Front Map</h2>
+				<a href="https://www.wpc.ncep.noaa.gov//noaa/noaa.gif" target="_blank">
+					<img src="https://www.wpc.ncep.noaa.gov//noaa/noaa.gif" alt="NOAA Weather Graphic"
+						class="img-fluid" fetchpriority="high" loading="eager">
+				</a>
+				<p><strong>NOAA Weather Graphic:</strong> Click the image above to view a larger version. <a
+						href="https://www.noaa.gov/jetstream/wxmaps" target="_blank">Learn how to read surface weather
+						maps.</a></p>
+
+				<h3 class="text-center mt-3">Current CO2 Monitor</h3>
+				<a href="https://gml.noaa.gov/webdata/ccgg/trends/co2_trend_mlo.png" target="_blank">
+					<img src="https://gml.noaa.gov/webdata/ccgg/trends/co2_trend_mlo.png" alt="CO2 Trend Graph"
+						class="img-fluid" loading="lazy">
+				</a>
+				<p><strong>CO2 Monitor:</strong> Click the image above to view a larger version with detailed carbon
+					dioxide trend data.</p>
+			</div>
+
+			<div id="column2" class="col-md-6">
+				<h2 class="text-center">6-10 Day Future Outlook</h2>
+				<a href="https://www.cpc.ncep.noaa.gov/products/predictions/610day/610temp.new.gif" target="_blank">
+					<img src="https://www.cpc.ncep.noaa.gov/products/predictions/610day/610temp.new.gif"
+						alt="NOAA Temperature Prediction Graphic" class="img-fluid" loading="lazy">
+				</a>
+				<p><strong>Temperature Outlook:</strong> Click to view larger version.</p>
+
+				<a href="https://www.cpc.ncep.noaa.gov/products/predictions/610day/610prcp.new.gif" target="_blank">
+					<img src="https://www.cpc.ncep.noaa.gov/products/predictions/610day/610prcp.new.gif"
+						alt="NOAA Precipitation Prediction Graphic" class="img-fluid mt-3" loading="lazy">
+				</a>
+				<p><strong>Precipitation Outlook:</strong> Click to view larger version.</p>
+			</div>
+		</div>
+
+		<!-- ── Drought Monitor ── -->
+		<div id="drought-monitor" class="mt-4">
+			<div class="text-center p-3 border rounded bg-light mb-3">
+				<h3>U.S. Drought Monitor</h3>
+				<p class="mb-0">Real-time drought conditions from <strong>Abnormally Dry (D0)</strong> to <strong>Exceptional Drought (D4)</strong>. Updated weekly.</p>
+			</div>
+			<div class="border rounded overflow-hidden" style="height:600px;">
+				<iframe data-src="https://droughtmonitor.unl.edu/CurrentMap.aspx"
+					width="100%" height="100%"
+					style="border:none;" title="U.S. Drought Monitor" loading="lazy"></iframe>
+			</div>
+		</div>
+
+		<!-- ── Climate Shift Index ── -->
+		<div id="climate-shift-index" class="mt-4">
+			<div class="text-center p-3 border rounded bg-light mb-3">
+				<h2>Climate Shift Index</h2>
+				<p class="mb-0">How much climate change has altered local temperatures. Drag or pinch to explore.</p>
+			</div>
+			<div class="border rounded overflow-hidden" style="height:600px;">
+				<iframe data-src="https://csi.climatecentral.org/climate-shift-index?lat=38.54817&lng=-95.00977&zoom=4"
+					width="100%" height="100%"
+					style="border:none;" title="Climate Shift Index" loading="lazy"></iframe>
+			</div>
+		</div>
+
+		<!-- ── ENSO ── -->
+		<div id="enso-discussion" class="mt-5 p-4 border bg-light rounded">
+			<h3 class="text-center mb-4">ENSO Diagnostic Discussion</h3>
+			<p class="text-center">
+				The latest <strong>El Niño / Southern Oscillation</strong> advisory from NOAA — including current
+				SST anomalies, model forecasts, and strength outlook.
+			</p>
+			<div class="text-center">
+				<a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml"
+					target="_blank" class="btn btn-primary btn-lg">
+					<i class="bi bi-box-arrow-up-right me-2"></i>Read ENSO Discussion on NOAA
+				</a>
+			</div>
+			<p class="text-muted small mt-3 mb-0 text-center">
+				Updated approximately every 2 weeks by the Climate Prediction Center / NCEP / NWS
+			</p>
+		</div>
+
+		<!-- ── Jet Stream ── -->
+		<div id="wind-jet-stream" class="mt-4">
+			<div class="text-center p-3 border rounded bg-light mb-3">
+				<h2 class="mb-0">Wind &amp; Jet Stream</h2>
+			</div>
+			<div class="border rounded overflow-hidden" style="height:600px;">
+				<iframe data-src="https://www.wunderground.com/maps/wind/jet-stream"
+					width="100%" height="100%"
+					style="border:none;" title="Jet Stream Map" loading="lazy"></iframe>
+			</div>
+		</div>
+
+		<!-- ── News ── -->
+		<div id="news-section" class="mt-5 p-4 border bg-light rounded">
+			<h3 class="text-center mb-4">Latest Weather &amp; Environment News</h3>
+			<div id="news-container">
+				<div class="row">
+					<div class="col-md-4 mb-3">
+						<div class="skeleton mb-2" style="height:160px;"></div>
+						<div class="skeleton mb-1" style="width:70%;"></div>
+						<div class="skeleton" style="width:50%;"></div>
+					</div>
+					<div class="col-md-4 mb-3">
+						<div class="skeleton mb-2" style="height:160px;"></div>
+						<div class="skeleton mb-1" style="width:70%;"></div>
+						<div class="skeleton" style="width:50%;"></div>
+					</div>
+					<div class="col-md-4 mb-3">
+						<div class="skeleton mb-2" style="height:160px;"></div>
+						<div class="skeleton mb-1" style="width:70%;"></div>
+						<div class="skeleton" style="width:50%;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ── Footer ── -->
+		<footer id="footer" class="text-center text-muted mt-4 py-3 border-top">
+			<p id="footerText">&copy; 2025 Whistling Will's US Weather Outlook Page. Data provided by NOAA, U.S. Drought Monitor, and Climate Central.</p>
+		</footer>
+
+	</div><!-- /.page-container -->
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script>
+		/* ══════════════════════════════════════════
+		   Lazy-load iframes via IntersectionObserver
+		══════════════════════════════════════════ */
+		(function () {
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach(e => {
+					if (e.isIntersecting) {
+						const el = e.target;
+						const src = el.getAttribute('data-src');
+						if (src) { el.src = src; el.removeAttribute('data-src'); }
+						observer.unobserve(el);
+					}
+				});
+			}, { rootMargin: '300px' });
+			document.querySelectorAll('iframe[data-src]').forEach(el => observer.observe(el));
+		})();
+
+		/* ══════════════════════════════════════════
+		   Weather table search filter
+		══════════════════════════════════════════ */
+		function setupWeatherSearch() {
+			const input = document.getElementById('weatherSearch');
+			const clear = document.getElementById('clearWeatherSearch');
+			if (!input) return;
+			const filterRows = () => {
+				const q = input.value.trim().toLowerCase();
+				document.querySelectorAll('#current-weather-table tbody tr, #forecast-weather-table tbody tr, #world-current-weather-table tbody tr, #world-forecast-weather-table tbody tr').forEach(row => {
+					const city = row.cells[0]?.textContent || '';
+					row.classList.toggle('d-none', q && !city.toLowerCase().includes(q));
+				});
+			};
+			input.addEventListener('input', filterRows);
+			clear?.addEventListener('click', () => { input.value = ''; filterRows(); input.focus(); });
+		}
+
+		function setupToggle(sectionId, btnId, iconId, labelId) {
+			const btn = document.getElementById(btnId);
+			const icon = document.getElementById(iconId);
+			const label = document.getElementById(labelId);
+			if (!btn) return;
+			btn.addEventListener('click', () => {
+				const expanded = btn.getAttribute('aria-expanded') === 'true';
+				if (icon) icon.className = expanded ? 'bi bi-chevron-double-down' : 'bi bi-chevron-double-up';
+				if (label) label.textContent = expanded ? 'Show Weather Tables' : 'Hide Weather Tables';
+			});
+		}
+
+		/* ══════════════════════════════════════════
+		   Dark mode
+		══════════════════════════════════════════ */
+		(function () {
+			const html = document.documentElement;
+			const icon = document.getElementById('themeIcon');
+			const STORAGE_KEY = 'wp_weather_theme';
+
+			function applyTheme(theme) {
+				html.setAttribute('data-bs-theme', theme);
+				icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+				localStorage.setItem(STORAGE_KEY, theme);
+			}
+
+			applyTheme(localStorage.getItem(STORAGE_KEY)
+				|| (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
+			document.getElementById('themeToggle').addEventListener('click', () => {
+				const current = html.getAttribute('data-bs-theme');
+				applyTheme(current === 'dark' ? 'light' : 'dark');
+			});
+		})();
+
+		/* ══════════════════════════════════════════
+		   Constants
+		══════════════════════════════════════════ */
+		const US_CITIES = [
+			{ name: 'New York, NY',         lat: 40.7128,  lon: -74.0060 },
+			{ name: 'Los Angeles, CA',      lat: 34.0522,  lon: -118.2437 },
+			{ name: 'Chicago, IL',          lat: 41.8781,  lon: -87.6298 },
+			{ name: 'Houston, TX',          lat: 29.7604,  lon: -95.3698 },
+			{ name: 'Phoenix, AZ',           lat: 33.4484,  lon: -112.0740 },
+			{ name: 'Philadelphia, PA',       lat: 39.9526,  lon: -75.1652 },
+			{ name: 'San Antonio, TX',       lat: 29.4241,  lon: -98.4936 },
+			{ name: 'San Diego, CA',        lat: 32.7157,  lon: -117.1611 },
+			{ name: 'Dallas, TX',           lat: 32.7767,  lon: -96.7970 },
+			{ name: 'San Jose, CA',          lat: 37.3382,  lon: -121.8863 },
+			{ name: 'Austin, TX',           lat: 30.2672,  lon: -97.7431 },
+			{ name: 'Jacksonville, FL',      lat: 30.3322,  lon: -81.6557 },
+			{ name: 'Fort Worth, TX',        lat: 32.7555,  lon: -97.3308 },
+			{ name: 'Columbus, OH',          lat: 39.9612,  lon: -82.9988 },
+			{ name: 'Charlotte, NC',          lat: 35.2271,  lon: -80.8431 },
+			{ name: 'San Francisco, CA',     lat: 37.7749,  lon: -122.4194 },
+			{ name: 'Indianapolis, IN',      lat: 39.7684,  lon: -86.1581 },
+			{ name: 'Seattle, WA',            lat: 47.6062,  lon: -122.3321 },
+			{ name: 'Denver, CO',             lat: 39.7392,  lon: -104.9903 },
+			{ name: 'Nashville, TN',          lat: 36.1627,  lon: -86.7816 },
+			{ name: 'Oklahoma City, OK',     lat: 35.4676,  lon: -97.5164 },
+			{ name: 'El Paso, TX',           lat: 31.7619,  lon: -106.4850 },
+			{ name: 'Boston, MA',             lat: 42.3601,  lon: -71.0589 },
+			{ name: 'Portland, OR',           lat: 45.5051,  lon: -122.6750 },
+			{ name: 'Las Vegas, NV',         lat: 36.1699,  lon: -115.1398 },
+			{ name: 'Detroit, MI',            lat: 42.3314,  lon: -83.0458 },
+			{ name: 'Memphis, TN',           lat: 35.1495,  lon: -90.0490 },
+			{ name: 'New Orleans, LA',        lat: 29.9511,  lon: -90.0715 },
+			{ name: 'Louisville, KY',         lat: 38.2527,  lon: -85.7585 },
+			{ name: 'Baltimore, MD',          lat: 39.2904,  lon: -76.6122 },
+			{ name: 'Milwaukee, WI',          lat: 43.0389,  lon: -87.9065 },
+			{ name: 'Albuquerque, NM',       lat: 35.0844,  lon: -106.6504 },
+			{ name: 'Tucson, AZ',            lat: 32.2226,  lon: -110.9747 },
+			{ name: 'Fresno, CA',             lat: 36.7378,  lon: -119.7871 },
+			{ name: 'Sacramento, CA',         lat: 38.5816,  lon: -121.4944 },
+			{ name: 'Atlanta, GA',            lat: 33.7490,  lon: -84.3880 },
+			{ name: 'Kansas City, MO',        lat: 39.0997,  lon: -94.5786 },
+			{ name: 'Colorado Springs, CO',   lat: 38.8339,  lon: -104.8214 },
+			{ name: 'Omaha, NE',             lat: 41.2565,  lon: -95.9345 },
+			{ name: 'Raleigh, NC',            lat: 35.7796,  lon: -78.6382 },
+			{ name: 'Miami, FL',              lat: 25.7617,  lon: -80.1918 },
+			{ name: 'Virginia Beach, VA',     lat: 36.8529,  lon: -75.9780 },
+			{ name: 'Oakland, CA',            lat: 37.8044,  lon: -122.2712 },
+			{ name: 'Minneapolis, MN',        lat: 44.9778,  lon: -93.2650 },
+			{ name: 'Tulsa, OK',             lat: 36.1540,  lon: -95.9928 },
+			{ name: 'Arlington, TX',           lat: 32.7356,  lon: -97.1081 },
+			{ name: 'Tampa, FL',              lat: 27.9506,  lon: -82.4572 },
+			{ name: 'Bakersfield, CA',        lat: 35.3733,  lon: -119.0187 },
+			{ name: 'Honolulu, HI',           lat: 21.3069,  lon: -157.8583 },
+			{ name: 'Aurora, CO',              lat: 39.7294,  lon: -104.8319 }
+		];
+
+		const WORLD_CITIES = [
+			{ name: 'Tokyo, Japan',           lat: 35.6762,  lon: 139.6503 },
+			{ name: 'Delhi, India',           lat: 28.7041,  lon: 77.1025 },
+			{ name: 'Shanghai, China',        lat: 31.2304,  lon: 121.4737 },
+			{ name: 'São Paulo, Brazil',      lat: -23.5505, lon: -46.6333 },
+			{ name: 'Cairo, Egypt',           lat: 30.0444,  lon: 31.2357 },
+			{ name: 'Mumbai, India',          lat: 19.0760,  lon: 72.8777 },
+			{ name: 'Beijing, China',          lat: 39.9042,  lon: 116.4074 },
+			{ name: 'Dhaka, Bangladesh',      lat: 23.8103,  lon: 90.4125 },
+			{ name: 'Mexico City, Mexico',    lat: 19.4326,  lon: -99.1332 },
+			{ name: 'Osaka, Japan',            lat: 34.6937,  lon: 135.5023 },
+			{ name: 'Chongqing, China',       lat: 29.4316,  lon: 106.9123 },
+			{ name: 'Istanbul, Turkey',       lat: 41.0082,  lon: 28.9784 },
+			{ name: 'Kolkata, India',          lat: 22.5726,  lon: 88.3639 },
+			{ name: 'Buenos Aires, Argentina', lat: -34.6037, lon: -58.3816 },
+			{ name: 'Lagos, Nigeria',          lat: 6.5244,   lon: 3.3792 },
+			{ name: 'Kinshasa, DRC',          lat: -4.4419,  lon: 15.2663 },
+			{ name: 'Manila, Philippines',      lat: 14.5995,  lon: 120.9842 },
+			{ name: 'Rio de Janeiro, Brazil',  lat: -22.9068, lon: -43.1729 },
+			{ name: 'Tianjin, China',          lat: 39.3434,  lon: 117.3616 },
+			{ name: 'Guangzhou, China',        lat: 23.1291,  lon: 113.2644 },
+			{ name: 'Moscow, Russia',          lat: 55.7558,  lon: 37.6173 },
+			{ name: 'Shenzhen, China',          lat: 22.5431,  lon: 114.0579 },
+			{ name: 'Lahore, Pakistan',         lat: 31.5204,  lon: 74.3587 },
+			{ name: 'Bangalore, India',         lat: 12.9716,  lon: 77.5946 },
+			{ name: 'Paris, France',           lat: 48.8566,  lon: 2.3522 },
+			{ name: 'Bogotá, Colombia',        lat: 4.7110,   lon: -74.0721 },
+			{ name: 'Jakarta, Indonesia',       lat: -6.2088,  lon: 106.8456 },
+			{ name: 'Chennai, India',          lat: 13.0827,  lon: 80.2707 },
+			{ name: 'Lima, Peru',              lat: -12.0464, lon: -77.0428 },
+			{ name: 'Bangkok, Thailand',        lat: 13.7563,  lon: 100.5018 },
+			{ name: 'Seoul, South Korea',      lat: 37.5665,  lon: 126.9780 },
+			{ name: 'Nagoya, Japan',            lat: 35.1815,  lon: 136.9066 },
+			{ name: 'Hyderabad, India',         lat: 17.3850,  lon: 78.4867 },
+			{ name: 'London, UK',              lat: 51.5074,  lon: -0.1278 },
+			{ name: 'Tehran, Iran',            lat: 35.6892,  lon: 51.3890 },
+			{ name: 'Chengdu, China',          lat: 30.5728,  lon: 104.0668 },
+			{ name: 'Nanjing, China',          lat: 32.0603,  lon: 118.7969 },
+			{ name: 'Wuhan, China',             lat: 30.5928,  lon: 114.3055 },
+			{ name: 'Ho Chi Minh City, Vietnam', lat: 10.8231, lon: 106.6297 },
+			{ name: 'Luanda, Angola',           lat: -8.8390,  lon: 13.2894 },
+			{ name: 'Ahmedabad, India',         lat: 23.0225,  lon: 72.5714 },
+			{ name: 'Kuala Lumpur, Malaysia',  lat: 3.1390,   lon: 101.6869 },
+			{ name: 'Hong Kong, China',         lat: 22.3193,  lon: 114.1694 },
+			{ name: 'Hangzhou, China',          lat: 30.2741,  lon: 120.1551 },
+			{ name: 'Foshan, China',           lat: 23.0218,  lon: 113.1219 },
+			{ name: 'Sydney, Australia',       lat: -33.8688, lon: 151.2093 },
+			{ name: 'Singapore',               lat: 1.3521,   lon: 103.8198 },
+			{ name: 'Baghdad, Iraq',           lat: 33.3152,  lon: 44.3661 },
+			{ name: 'Madrid, Spain',           lat: 40.4168,  lon: -3.7038 },
+			{ name: 'Berlin, Germany',          lat: 52.5200,  lon: 13.4050 }
+		];
+
+		const WMO_CODES = {
+			0:   { text: 'Clear',              cls: 'bi-sun-fill' },
+			1:   { text: 'Mostly Clear',       cls: 'bi-sun-fill' },
+			2:   { text: 'Partly Cloudy',       cls: 'bi-cloud-sun-fill' },
+			3:   { text: 'Overcast',            cls: 'bi-cloud-fill' },
+			45:  { text: 'Fog',                 cls: 'bi-cloud-haze-fill' },
+			48:  { text: 'Icy Fog',            cls: 'bi-cloud-haze-fill' },
+			51:  { text: 'Light Drizzle',       cls: 'bi-cloud-drizzle-fill' },
+			53:  { text: 'Drizzle',             cls: 'bi-cloud-drizzle-fill' },
+			55:  { text: 'Heavy Drizzle',       cls: 'bi-cloud-drizzle-fill' },
+			56:  { text: 'Light Freezing Drizzle', cls: 'bi-cloud-drizzle-fill' },
+			57:  { text: 'Heavy Freezing Drizzle', cls: 'bi-cloud-drizzle-fill' },
+			61:  { text: 'Light Rain',          cls: 'bi-cloud-rain-fill' },
+			63:  { text: 'Rain',                cls: 'bi-cloud-rain-fill' },
+			65:  { text: 'Heavy Rain',          cls: 'bi-cloud-rain-fill' },
+			66:  { text: 'Light Freezing Rain', cls: 'bi-cloud-rain-fill' },
+			67:  { text: 'Freezing Rain',       cls: 'bi-cloud-rain-fill' },
+			71:  { text: 'Light Snow',          cls: 'bi-snow' },
+			73:  { text: 'Snow',                cls: 'bi-snow' },
+			75:  { text: 'Heavy Snow',          cls: 'bi-snow' },
+			77:  { text: 'Snow Grains',         cls: 'bi-snow' },
+			80:  { text: 'Light Showers',       cls: 'bi-cloud-rain-fill' },
+			81:  { text: 'Showers',             cls: 'bi-cloud-rain-fill' },
+			82:  { text: 'Heavy Showers',       cls: 'bi-cloud-rain-fill' },
+			85:  { text: 'Snow Showers',        cls: 'bi-snow' },
+			86:  { text: 'Heavy Snow Showers',  cls: 'bi-snow' },
+			95:  { text: 'Thunderstorm',        cls: 'bi-cloud-lightning-rain-fill' },
+			96:  { text: 'Thunderstorm w/ Hail', cls: 'bi-cloud-lightning-rain-fill' },
+			99:  { text: 'Heavy T-storm w/ Hail', cls: 'bi-cloud-lightning-rain-fill' }
+		};
+
+		const WEATHER_ICON_CACHE_KEY = 'wp_weather_cache_us';
+		const WEATHER_ICON_CACHE_KEY_WORLD = 'wp_weather_cache_world';
+		const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+		/* ══════════════════════════════════════════
+		   Helpers
+		══════════════════════════════════════════ */
+		function getWeatherInfo(code) {
+			return WMO_CODES[code] || { text: 'Unknown', cls: 'bi-question-circle-fill' };
+		}
+
+		function iconCell(cls) {
+			return `<i class="bi ${cls}" style="font-size:1.1rem;"></i>`;
+		}
+
+		function tempCell(val) {
+			return `${Math.round(val)}°F`;
+		}
+
+		function humidityCell(val) {
+			return `${Math.round(val)}%`;
+		}
+
+		function windCell(val) {
+			return `${Math.round(val)} mph`;
+		}
+
+		function staleBadge(ts) {
+			if (!ts) return '';
+			const mins = Math.round((Date.now() - ts) / 60000);
+			return `<span class="stale-badge" title="Last updated ${new Date(ts).toLocaleTimeString()}">Cached ${mins}m ago</span>`;
+		}
+
+		/* ══════════════════════════════════════════
+		   Weather data loader — shared for US & World
+		   Returns array of { name, current, forecast }
+		══════════════════════════════════════════ */
+		async function loadWeatherFor(cities, cacheKey) {
+			const base = 'https://api.open-meteo.com/v1/forecast';
+			const params = 'current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto';
+
+			// 1. Try cache first (instant)
+			const cached = loadCache(cacheKey);
+			if (cached) return cached.data;
+
+			// 2. Fetch fresh data in parallel
+			const results = await Promise.allSettled(
+				cities.map(c =>
+					fetch(`${base}?latitude=${c.lat}&longitude=${c.lon}&${params}`)
+						.then(r => r.ok ? r.json() : Promise.reject(r.status))
+				)
+			);
+
+			const succeeded = results.filter(r => r.status === 'fulfilled');
+			if (succeeded.length === 0) return []; // all failed
+
+			// 3. Build data array in original city order
+			const data = [];
+			for (let i = 0; i < cities.length; i++) {
+				if (results[i].status === 'fulfilled') {
+					const d = results[i].value;
+					data.push({
+						name: cities[i].name,
+						current: {
+							temp:     d.current.temperature_2m,
+							humidity: d.current.relative_humidity_2m,
+							code:     d.current.weather_code,
+							wind:     d.current.wind_speed_10m
+						},
+						forecast: {
+							high:   d.daily.temperature_2m_max[0],
+							low:    d.daily.temperature_2m_min[0],
+							precip: d.daily.precipitation_probability_max[0],
+							code:   d.daily.weather_code[0]
+						}
+					});
+				}
+			}
+
+			saveCache(cacheKey, data);
+			return data;
+		}
+
+		function renderWeather(data, currentTable, forecastTable) {
+			currentTable.innerHTML = data.map(c => {
+				const w = getWeatherInfo(c.current.code);
+				return `<tr>
+					<td><strong>${c.name}</strong></td>
+					<td>${tempCell(c.current.temp)}</td>
+					<td title="${w.text}">${iconCell(w.cls)}</td>
+					<td>${humidityCell(c.current.humidity)}</td>
+					<td>${windCell(c.current.wind)}</td>
+				</tr>`;
+			}).join('');
+
+			forecastTable.innerHTML = data.map(c => {
+				const w = getWeatherInfo(c.forecast.code);
+				return `<tr>
+					<td><strong>${c.name}</strong></td>
+					<td>${tempCell(c.forecast.high)}</td>
+					<td>${tempCell(c.forecast.low)}</td>
+					<td>${c.forecast.precip}%</td>
+					<td title="${w.text}">${iconCell(w.cls)}</td>
+				</tr>`;
+			}).join('');
+		}
+
+		function loadCache(key) {
+			try {
+				const raw = localStorage.getItem(key);
+				if (!raw) return null;
+				const obj = JSON.parse(raw);
+				if (Date.now() - obj.timestamp > CACHE_TTL_MS) {
+					localStorage.removeItem(key);
+					return null;
+				}
+				return obj;
+			} catch { return null; }
+		}
+
+		function saveCache(key, data) {
+			try {
+				localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data }));
+			} catch { /* storage full or unavailable */ }
+		}
+
+		/* ══════════════════════════════════════════
+		   News
+		══════════════════════════════════════════ */
+		const RSS_FEEDS = [
+			'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
+			'https://www.theguardian.com/environment/rss',
+			'https://rss.nytimes.com/services/xml/rss/nyt/Climate.xml',
+			'https://www.noaa.gov/rss.xml'
+		];
+
+		const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+		async function loadNews() {
+			const container = document.getElementById('news-container');
+
+			const results = await Promise.allSettled(
+				RSS_FEEDS.map(url =>
+					fetch(RSS2JSON + encodeURIComponent(url))
+						.then(r => r.ok ? r.json() : Promise.reject(r.status))
+				)
+			);
+
+			const articles = [];
+			results.forEach((r, i) => {
+				if (r.status !== 'fulfilled' || r.value.status !== 'ok' || !r.value.items) return;
+				r.value.items.slice(0, 4).forEach(item => {
+					if (!item.title || !item.link) return;
+					const img = item.thumbnail || item.enclosure?.link ||
+						'https://images.unsplash.com/photo-1504384308384-315111193111?w=600&auto=format';
+					articles.push({
+						title: item.title,
+						desc: item.description
+							? item.description.replace(/<[^>]+>/g, '').substring(0, 120) + '...'
+							: '',
+						image: img,
+						source: r.value.feed.title || RSS_FEEDS[i],
+						url: item.link,
+						date: item.pubDate ? new Date(item.pubDate).toLocaleDateString() : ''
+					});
+				});
+			});
+
+			if (articles.length === 0) {
+				container.innerHTML = '<p class="text-muted text-center">No news articles available at this time.</p>';
+				return;
+			}
+
+			// Show newest first
+			articles.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+			container.innerHTML = '<div class="row">' + articles.slice(0, 9).map(a => `
+				<div class="col-sm-6 col-lg-4 mb-3">
+					<div class="card h-100">
+						<img src="${a.image}" class="news-card-img" alt="${a.title}" loading="lazy"
+							onerror="this.style.display='none'">
+						<div class="card-body">
+							<div class="d-flex justify-content-between align-items-start mb-1">
+								<span class="badge bg-secondary text-wrap" style="font-size:0.65rem;">${a.source}</span>
+								<small class="text-muted">${a.date}</small>
+							</div>
+							<a href="${a.url}" target="_blank" class="text-decoration-none">
+								<strong>${a.title}</strong>
+							</a>
+							${a.desc ? `<p class="card-text mt-1 mb-0"><small class="text-muted">${a.desc}</small></p>` : ''}
+						</div>
+					</div>
+				</div>
+			`).join('') + '</div>';
+		}
+
+		/* ══════════════════════════════════════════
+		   Boot
+		══════════════════════════════════════════ */
+		document.addEventListener('DOMContentLoaded', async () => {
+			document.getElementById('footerText').innerHTML =
+				`&copy; ${new Date().getFullYear()} Whistling Will's US Weather Outlook Page. Data provided by NOAA, U.S. Drought Monitor, and Climate Central.`;
+
+			const [usResults, worldResults] = await Promise.all([
+				loadWeatherFor(US_CITIES,    WEATHER_ICON_CACHE_KEY),
+				loadWeatherFor(WORLD_CITIES, WEATHER_ICON_CACHE_KEY_WORLD)
+			]);
+			renderWeather(usResults,
+				document.querySelector('#current-weather-table tbody'),
+				document.querySelector('#forecast-weather-table tbody'));
+			renderWeather(worldResults,
+				document.querySelector('#world-current-weather-table tbody'),
+				document.querySelector('#world-forecast-weather-table tbody'));
+			document.getElementById('weatherMeta').innerHTML = staleBadge(Date.now());
+
+			loadNews();
+			setupWeatherSearch();
+			setupToggle('weather-content', 'weatherToggle', 'weatherToggleIcon', 'weatherToggleLabel');
+		});
+	</script>
+</body>
+
+</html>
