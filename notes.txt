@@ -1,0 +1,23 @@
+# SSH & GitHub Setup Notes - July 19, 2026
+
+## SSH Key Setup (New Computer)
+- Generated new ED25519 SSH key: `~/.ssh/id_ed25519_github`
+- Added key to SSH agent: `ssh-add --apple-use-keychain ~/.ssh/id_ed25519_github`
+- Created SSH config at `~/.ssh/config` to use this key for github.com
+- Public key added to GitHub account: wperrin
+
+## Repository
+- Original remote was HTTPS, switched to SSH: git@github.com:wperrin/mywp-weather.git
+- Note: GitHub username is wperrin (not willp)
+
+## GitHub Pages
+- Repository: https://github.com/wperrin/mywp-weather
+- GitHub Pages site: https://wperrin.github.io/mywp-weather/
+- Renamed `mywp-v2.html` to `index.html` so GitHub Pages serves it as the root page
+- Note: GitHub Pages may cache the Jekyll README page at root for a few minutes
+  - If root URL shows old Jekyll page, try: https://wperrin.github.io/mywp-weather/index.html
+  - Or hard refresh (Cmd+Shift+R)
+
+## Git Config (needed fixing)
+- User identity needed setup on new computer
+- Run: `git config --global user.name "Your Name"` and `git config --global user.email "email@example.com"`
