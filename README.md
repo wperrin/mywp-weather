@@ -1,3 +1,3 @@
 # mywp-weather
 
-Live weather dashboard at: https://willp.github.io/mywp-weather/mywp-v2.html
+Live weather dashboard at: https://wperrin.github.io/mywp-weather/
